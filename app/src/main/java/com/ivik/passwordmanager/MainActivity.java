@@ -52,12 +52,40 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 String unencryptedPassword = input.getText().toString();
                 password[0] = encryptString(unencryptedPassword);
+                if (isPasswordCorrect(password[0])) {
+                    CreatePopup("Correct!", "OK");
+                }
+                else {
+                    CreatePopup("Wrong!", "OK");
+                }
             }
         });
         
         builder.show();
 
         return password[0];
+    }
+
+    public void setNewPassword() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Password?");
+
+        final String[] password = new String[1];
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String unencryptedPassword = input.getText().toString();
+                password[0] = encryptString(unencryptedPassword);
+                changePassword(password[0]);
+            }
+        });
+
+        builder.show();
     }
 
     public boolean isPasswordCorrect(String hashedPassword) {
@@ -107,37 +135,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void changePassword(String encryptedPassword) {
+        editor.putString("passwordHash", encryptedPassword);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (false) {
-            editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-            boolean value = getSharedPreferences("data", MODE_PRIVATE).getBoolean("isFirstTimeLaunch", true);
-
-            if (value == true) {
-                CreatePopup("true", "OK");
-            }
-            else {
-                CreatePopup("false", "OK");
-            }
+        editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+        if (isFirstTimeLaunch()) {
+            setNewPassword();
             setFirstTimeLaunch(false);
         }
         else {
-            while (true) {
                 String encryptedPassword = null;
                 try {
                     encryptedPassword = askForPassword();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if (isPasswordCorrect(encryptedPassword)) {
-                    CreatePopup("Good password!", "OK");
-                    break;
-                } else {
-                    CreatePopup("Wrong password!", "OK");
-                }
-            }
+//                if (isPasswordCorrect(encryptedPassword)) {
+//                    CreatePopup("Good password!", "OK");
+//                    break;
+//                } else {
+//                    CreatePopup("Wrong password!", "OK");
+//                }
         }
     }
 
