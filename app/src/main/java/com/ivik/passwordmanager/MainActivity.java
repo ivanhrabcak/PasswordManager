@@ -2,12 +2,15 @@ package com.ivik.passwordmanager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -25,143 +28,53 @@ public class MainActivity extends AppCompatActivity {
         editor.putBoolean("isFirstTimeLaunch", value);
     }
 
-    public void CreatePopup(String popupText, String popupButtonText) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(popupText)
-                .setPositiveButton(popupButtonText, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        builder.show();
 
-    }
 
-    public String askForPassword() throws InterruptedException {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Password?");
+//    public void setNewPassword() {
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("New password?");
+//
+//        final String[] password = new String[1];
+//
+//        final EditText input = new EditText(this);
+//        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+//        builder.setView(input);
+//
+//        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                String unencryptedPassword = input.getText().toString();
+//                password[0] = encryptString(unencryptedPassword);
+//                changePassword(password[0]);
+//            }
+//        });
+//
+//        builder.show();
+//    }
 
-        final String[] password = new String[1];
 
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        builder.setView(input);
 
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String unencryptedPassword = input.getText().toString();
-                password[0] = encryptString(unencryptedPassword);
-                if (isPasswordCorrect(password[0])) {
-                    CreatePopup("Correct!", "OK");
-                }
-                else {
-                    CreatePopup("Wrong!", "OK");
-                }
-            }
-        });
-        
-        builder.show();
 
-        return password[0];
-    }
-
-    public void setNewPassword() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Password?");
-
-        final String[] password = new String[1];
-
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        builder.setView(input);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String unencryptedPassword = input.getText().toString();
-                password[0] = encryptString(unencryptedPassword);
-                changePassword(password[0]);
-            }
-        });
-
-        builder.show();
-    }
-
-    public boolean isPasswordCorrect(String hashedPassword) {
-        String hash = encryptString(hashedPassword);
-        String expectedPasswordHash = getSharedPreferences("data", MODE_PRIVATE).getString("passwordHash", "");
-
-        if (hash == expectedPasswordHash) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    public static String encryptString(String input) // Copied
-    {
-        if (input == null || input.equals("")) {
-            return "";
-        }
-        try {
-            // getInstance() method is called with algorithm SHA-512
-            MessageDigest md = MessageDigest.getInstance("SHA-512");
-
-            // digest() method is called
-            // to calculate message digest of the input string
-            // returned as array of byte
-            byte[] messageDigest = md.digest(input.getBytes());
-
-            // Convert byte array into signum representation
-            BigInteger no = new BigInteger(1, messageDigest);
-
-            // Convert message digest into hex value
-            String hashtext = no.toString(16);
-
-            // Add preceding 0s to make it 32 bit
-            while (hashtext.length() < 32) {
-                hashtext = "0" + hashtext;
-            }
-
-            // return the HashText
-            return hashtext;
-        }
-
-        // For specifying wrong message digest algorithms
-        catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     private void changePassword(String encryptedPassword) {
         editor.putString("passwordHash", encryptedPassword);
+        editor.apply();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-        if (isFirstTimeLaunch()) {
-            setNewPassword();
-            setFirstTimeLaunch(false);
-        }
-        else {
-                String encryptedPassword = null;
-                try {
-                    encryptedPassword = askForPassword();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-//                if (isPasswordCorrect(encryptedPassword)) {
-//                    CreatePopup("Good password!", "OK");
-//                    break;
-//                } else {
-//                    CreatePopup("Wrong password!", "OK");
-//                }
-        }
+//        setContentView(R.layout.activity_main);
+//        editor = getSharedPreferences("data", MODE_PRIVATE).edit();
+//        if (isFirstTimeLaunch()) {
+//            setNewPassword();
+//            setFirstTimeLaunch(false);
+//        }
+//        else {
+//                askForPassword();
+//        }
+        LinearLayout landingPage = new LandingPage(this);
+        getLayoutInflater().inflate(R.layout.landing_page, landingPage);
     }
 
     @Override
