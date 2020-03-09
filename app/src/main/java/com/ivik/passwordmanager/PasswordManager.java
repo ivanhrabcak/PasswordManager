@@ -99,7 +99,7 @@ public class PasswordManager {
     }
     
     public boolean addAccount(Account account) {
-        return addAccount(account.getUsername, account.getPassword());
+        return addAccount(account.getUsername(), account.getPassword());
     }
     
 
@@ -131,7 +131,7 @@ public class PasswordManager {
             }
             if (decryptedUsername.equals(username)) {
                 try {
-                    return new Account(decryptString(passwords.get(encryptedUsername), userKey), decryptedUsername);
+                    return new Account(decryptString(passwords.getString(encryptedUsername), userKey), decryptedUsername);
                 } catch (JSONException e) {
                     return null;
                 }
@@ -140,7 +140,7 @@ public class PasswordManager {
         return null;
     }
 
-    public void parseAccountsFromJsonData(String data) {
+    public void parseAccountsFromJsonData(String data) throws JSONException {
         passwords = new JSONObject(data);
     }
     

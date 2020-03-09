@@ -6,11 +6,17 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.text.InputType;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
@@ -20,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static androidx.appcompat.app.AlertController.*;
 
 public class PasswordRecyclerView extends LinearLayout {
     private PasswordManager passwordManager;
@@ -129,7 +134,7 @@ public class PasswordRecyclerView extends LinearLayout {
                 }
                 userKey = input.getText().toString();
                 passwordManager = new PasswordManager(userKey);
-
+                loadViews();
             }
         });
 
@@ -140,9 +145,25 @@ public class PasswordRecyclerView extends LinearLayout {
         // TODO: load passwords and show them in a recycler layout
         List<Account> accounts = passwordManager.getPasswords(userKey);
         List<PasswordView> passwordViews = new ArrayList<>();
-        RecycleListView recycleListView = findViewById(R.id.passwords);
 
+        for (Account account : accounts) {
+            passwordViews.add(new PasswordView(getContext(), account));
+        }
 
+        RecyclerView recyclerView = findViewById(R.id.passwords);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutManager);
+
+        Account testAccount = new Account("1234", "ivik");
+        PasswordView passwordView = new PasswordView(getContext(), testAccount);
+
+        passwordViews.add(passwordView);
+
+        recyclerView.addView(passwordView);
+
+        for (PasswordView view : passwordViews) {
+            recyclerView.addView(view);
+        }
     }
 
     public void init() {
