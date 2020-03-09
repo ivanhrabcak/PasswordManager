@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        LinearLayout passwordRecyclerView = new PasswordRecyclerView(this);
-//        getLayoutInflater().inflate(R.layout.password_recycler_view, passwordRecyclerView);
+        LinearLayout passwordRecyclerView = new PasswordRecyclerView(this);
+        getLayoutInflater().inflate(R.layout.password_recycler_view, passwordRecyclerView);
     }
 
     @Override

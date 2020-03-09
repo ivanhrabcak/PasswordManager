@@ -12,15 +12,19 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
+import static androidx.appcompat.app.AlertController.*;
 
 public class PasswordRecyclerView extends LinearLayout {
-    private boolean locked;
     private PasswordManager passwordManager;
+    private String userKey;
 
     public PasswordRecyclerView(Context context) {
         super(context);
@@ -123,18 +127,26 @@ public class PasswordRecyclerView extends LinearLayout {
                     askForPassword();
                     return;
                 }
-                locked = false;
-                passwordManager = new PasswordManager(input.getText().toString());
+                userKey = input.getText().toString();
+                passwordManager = new PasswordManager(userKey);
+
             }
         });
 
         builder.show();
     }
 
-    public void init() {
-        locked = true;
-        askForPassword();
-        while (locked != false) {}
+    public void loadViews() {
         // TODO: load passwords and show them in a recycler layout
+        List<Account> accounts = passwordManager.getPasswords(userKey);
+        List<PasswordView> passwordViews = new ArrayList<>();
+        RecycleListView recycleListView = findViewById(R.id.passwords);
+
+
+    }
+
+    public void init() {
+        askForPassword();
+
     }
 }
