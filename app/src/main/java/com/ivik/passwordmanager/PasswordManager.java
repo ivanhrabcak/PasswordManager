@@ -100,8 +100,13 @@ public class PasswordManager {
         }
         return accounts;
     }
+    
+    public boolean addAccount(Account account) {
+        return addAccount(account.getUsername, account.getPassword());
+    }
+    
 
-    public boolean addPassword(String username, String password) {
+    public boolean addAccount(String username, String password) {
         String encryptedUsername = null;
         String encryptedPassword = null;
         try {
@@ -118,7 +123,7 @@ public class PasswordManager {
         return true;
     }
 
-    public String getPasswordByUsername(String username, String userKey) {
+    public Account getAccountByUsername(String username, String userKey) {
         for (Iterator<String> it = passwords.keys(); it.hasNext();) {
             String encryptedUsername = it.next();
             String decryptedUsername = null;
@@ -129,7 +134,7 @@ public class PasswordManager {
             }
             if (decryptedUsername.equals(username)) {
                 try {
-                    return (String) passwords.get(encryptedUsername);
+                    return new Account(decryptString(passwords.get(encryptedUsername), userKey), decryptedUsername);
                 } catch (JSONException e) {
                     return null;
                 }
