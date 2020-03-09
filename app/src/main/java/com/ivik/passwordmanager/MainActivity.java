@@ -64,22 +64,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
-//        editor = getSharedPreferences("data", MODE_PRIVATE).edit();
-//        if (isFirstTimeLaunch()) {
-//            setNewPassword();
-//            setFirstTimeLaunch(false);
-//        }
-//        else {
-//                askForPassword();
-//        }
-        LinearLayout landingPage = new LandingPage(this);
-        getLayoutInflater().inflate(R.layout.landing_page, landingPage);
+//        LinearLayout passwordRecyclerView = new PasswordRecyclerView(this);
+//        getLayoutInflater().inflate(R.layout.password_recycler_view, passwordRecyclerView);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
         editor.apply();
     }
 }

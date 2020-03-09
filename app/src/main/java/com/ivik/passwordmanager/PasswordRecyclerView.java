@@ -18,26 +18,27 @@ import java.security.NoSuchAlgorithmException;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class LandingPage extends LinearLayout {
+public class PasswordRecyclerView extends LinearLayout {
     private boolean locked;
+    private PasswordManager passwordManager;
 
-    public LandingPage(Context context) {
+    public PasswordRecyclerView(Context context) {
         super(context);
         init();
     }
 
-    public LandingPage(Context context, @Nullable AttributeSet attrs) {
+    public PasswordRecyclerView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public LandingPage(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PasswordRecyclerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public LandingPage(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public PasswordRecyclerView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
@@ -123,6 +124,7 @@ public class LandingPage extends LinearLayout {
                     return;
                 }
                 locked = false;
+                passwordManager = new PasswordManager(input.getText().toString());
             }
         });
 
