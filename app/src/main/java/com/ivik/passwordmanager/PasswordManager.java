@@ -22,24 +22,34 @@ public class PasswordManager {
         this.userKey = userKey;
     }
 
-    public static String encryptString(String input, String key) throws Exception {
-        Cipher c = Cipher.getInstance("AES");
-        SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-        c.init(Cipher.ENCRYPT_MODE, k);
+    public static String encryptString(String input, String key) {
+        try {
+            Cipher c = Cipher.getInstance("AES");
+            SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
+            c.init(Cipher.ENCRYPT_MODE, k);
 
-        byte[] encryptedData = c.doFinal(input.getBytes());
+            byte[] encryptedData = c.doFinal(input.getBytes());
 
-        return encryptedData.toString();
+            return encryptedData.toString();
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 
-    public static String decryptString(String input, String key) throws Exception {
-        Cipher c = Cipher.getInstance("AES");
-        SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-        c.init(Cipher.DECRYPT_MODE, k);
+    public static String decryptString(String input, String key) {
+        try {
+            Cipher c = Cipher.getInstance("AES");
+            SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
+            c.init(Cipher.DECRYPT_MODE, k);
 
-        byte[] decrypted = c.doFinal(input.getBytes());
+            byte[] decrypted = c.doFinal(input.getBytes());
 
-        return decrypted.toString();
+            return decrypted.toString();
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
 
     public static String hashString(String input) // Copied
