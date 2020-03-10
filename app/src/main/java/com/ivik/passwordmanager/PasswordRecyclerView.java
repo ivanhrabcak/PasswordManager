@@ -8,6 +8,8 @@ import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -145,25 +147,49 @@ public class PasswordRecyclerView extends LinearLayout {
         // TODO: load passwords and show them in a recycler layout
         List<Account> accounts = passwordManager.getPasswords(userKey);
         List<PasswordView> passwordViews = new ArrayList<>();
+        Account testAccount = new Account("1234", "ivik");
+        accounts.add(testAccount);
 
         for (Account account : accounts) {
-            passwordViews.add(new PasswordView(getContext(), account));
+            PasswordView passwordView = new PasswordView(getContext());
+            passwordViews.add(passwordView);
         }
 
         RecyclerView recyclerView = findViewById(R.id.passwords);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        Account testAccount = new Account("1234", "ivik");
-        PasswordView passwordView = new PasswordView(getContext(), testAccount);
+        accounts.add(new Account("1234", "asldkasdkl"));
+        accounts.add(new Account("123123", "asdasclasckja"));
+        accounts.add(new Account("12351245123", "askjdsc mnAXL;KASLD"));
 
-        passwordViews.add(passwordView);
+        PasswordRecyclerViewAdapter adapter = new PasswordRecyclerViewAdapter(accounts);
+        recyclerView.setAdapter(adapter);
 
-        recyclerView.addView(passwordView);
 
-        for (PasswordView view : passwordViews) {
-            recyclerView.addView(view);
-        }
+
+        recyclerView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                System.out.println("ADASKCLSAKC:KASC:LKA:CLKD:LKC:LAK:KAS:LCKA:SLCASJCJAHSKASHCKJHASKJCHASKJHCKASHCKJASHCKJASH");
+            }
+        });
+
+        LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+        layoutInflater.inflate(R.layout.password_recycler_view, recyclerView);
+
+//
+//        recyclerView.addView(passwordView);
+
+//        for (PasswordView view : passwordViews) {
+//            if (view.getParent() != null) {
+//                ViewGroup parent = (ViewGroup)view.getParent();
+//                parent.removeView(view);
+//            }
+//            recyclerView.addView(view);
+//        }
+
+
     }
 
     public void init() {

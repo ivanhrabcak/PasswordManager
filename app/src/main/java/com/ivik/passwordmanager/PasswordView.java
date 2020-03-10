@@ -3,6 +3,7 @@ package com.ivik.passwordmanager;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -45,12 +46,16 @@ public class PasswordView extends LinearLayout {
         init();
     }
 
-    private void init() {
-        TextView account = findViewById(R.id.account);
+    public void bindAccount(Account account) {
+
+        TextView accountView = findViewById(R.id.account);
         TextView password = findViewById(R.id.password);
 
-        account.setText(this.account.getUsername());
-        password.setText(this.account.getPassword());
+        accountView.setText(account.getUsername());
+        password.setText(account.getPassword());
+    }
+
+    private void init() {
     }
 
     public Account getAccount() {
