@@ -3,6 +3,8 @@ package com.ivik.passwordmanager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,9 +17,19 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
     public class ViewHolder extends RecyclerView.ViewHolder {
         public PasswordView passwordView;
 
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            System.out.println("viewholder");
             passwordView = (PasswordView) itemView;
+            Button deleteButton = passwordView.findViewById(R.id.delete_button);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    removeAt(getAdapterPosition());
+                    passwordView.onRemove();
+                }
+            });
         }
     }
 
@@ -25,19 +37,26 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
         this.accounts = accounts;
     }
 
+    public void removeAt(int position) {
+        accounts.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, getItemCount());
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         System.out.println("lmao");
-        LayoutInflater.from(parent.getContext()).inflate(R.layout.password_view, parent);
-        PasswordRecyclerViewAdapter.ViewHolder viewHolder = new ViewHolder(parent);
+        PasswordView pv = (PasswordView) LayoutInflater.from(parent.getContext()).inflate(R.layout.password_view, parent, false);
+
+        PasswordRecyclerViewAdapter.ViewHolder viewHolder = new ViewHolder(pv);
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         System.out.println("bound view holder");
-        holder.passwordView.bindAccount(accounts.get(position));
+        holder.passwordView.bindAccount(accounts.get(position), position);
     }
 
     @Override
@@ -45,3 +64,4 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
         return accounts.size();
     }
 }
+

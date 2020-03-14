@@ -3,18 +3,13 @@ package com.ivik.passwordmanager;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
 
 public class PasswordView extends LinearLayout {
     private Account account;
@@ -46,13 +41,16 @@ public class PasswordView extends LinearLayout {
         init();
     }
 
-    public void bindAccount(Account account) {
-
+    public void bindAccount(Account account, int order) {
         TextView accountView = findViewById(R.id.account);
         TextView password = findViewById(R.id.password);
 
         accountView.setText(account.getUsername());
         password.setText(account.getPassword());
+    }
+
+    public void onRemove() {
+        // todo: delete from shared preferences
     }
 
     private void init() {
