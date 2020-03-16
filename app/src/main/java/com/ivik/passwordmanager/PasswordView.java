@@ -1,5 +1,7 @@
 package com.ivik.passwordmanager;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -8,13 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
+import com.google.android.material.snackbar.Snackbar;
 
 public class PasswordView extends LinearLayout {
     private Account account;
@@ -47,12 +46,33 @@ public class PasswordView extends LinearLayout {
     }
 
     public void bindAccount(Account account) {
-
-        TextView accountView = findViewById(R.id.account);
-        TextView password = findViewById(R.id.password);
+        final TextView accountView = findViewById(R.id.account);
+        final TextView passwordView = findViewById(R.id.password);
 
         accountView.setText(account.getUsername());
-        password.setText(account.getPassword());
+        passwordView.setText(account.getPassword());
+
+        accountView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("username", accountView.getText());
+                clipboardManager.setPrimaryClip(clip);
+                Snackbar snackbar = Snackbar.make(v, "Username has been copied to clipboard", Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+        });
+
+        passwordView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipboardManager clipboardManager = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("password", passwordView.getText());
+                clipboardManager.setPrimaryClip(clip);
+                Snackbar snackbar = Snackbar.make(v, "Password has been copied to clipboard", Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+        });
     }
 
     private void init() {

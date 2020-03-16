@@ -1,11 +1,17 @@
 package com.ivik.passwordmanager;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -28,15 +34,13 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        System.out.println("lmao");
-        LayoutInflater.from(parent.getContext()).inflate(R.layout.password_view, parent);
-        PasswordRecyclerViewAdapter.ViewHolder viewHolder = new ViewHolder(parent);
+        PasswordView pv = (PasswordView) LayoutInflater.from(parent.getContext()).inflate(R.layout.password_view, parent, false);
+        PasswordRecyclerViewAdapter.ViewHolder viewHolder = new ViewHolder(pv);
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        System.out.println("bound view holder");
         holder.passwordView.bindAccount(accounts.get(position));
     }
 
