@@ -9,9 +9,13 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -27,13 +31,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        askForNewPassword();
         if (SharedPreferencesHelper.isFirstTimeLaunch(this)) {
             askForNewPassword();
         }
-//        else {
-//            askForPassword();
-//        }
+        else {
+            askForPassword();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.account_add_button) {
+            // add a new account
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void askForPassword() {
