@@ -1,9 +1,12 @@
 package com.ivik.passwordmanager;
 
+import android.util.Base64;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -48,7 +51,7 @@ public class PasswordManager {
 
             byte[] encryptedData = c.doFinal(input.getBytes());
 
-            return encryptedData.toString();
+            return Base64.encodeToString(encryptedData, Base64.DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -71,15 +74,15 @@ public class PasswordManager {
         key = String.valueOf(longKey);
         System.out.println(key);
         try {
-            Cipher c = Cipher.getInstance("AES");
             SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-            c.init(Cipher.DECRYPT_MODE, k);
 
-            byte[] decrypted = c.doFinal(input.getBytes());
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, k);
 
-            return decrypted.toString();
+            return new String(cipher.doFinal(Base64.decode(input.getBytes(), Base64.DEFAULT)));
         }
         catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -106,28 +109,15 @@ public class PasswordManager {
         }
     }
 
-    public List<Account> getPasswords(String userKey) { // TODO: fix D:
+    public List<Account> getPasswords(String userKey) throws JSONException { // TODO: fix D:
         List<Account> accounts = new ArrayList<>();
         for (Iterator<String> it = passwords.keys(); it.hasNext();) {
             String encryptedUsername = it.next();
-            String encryptedPassword;
+            String encryptedPassword = passwords.getString(encryptedUsername);
 
-            String decryptedPassword;
-            String decryptedUsername;
-            try {
-                encryptedPassword = passwords.getString(encryptedUsername);
-
-                decryptedPassword = decryptString(encryptedPassword, userKey);
-                decryptedUsername = decryptString(encryptedPassword, userKey);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return null;
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-
+            String decryptedPassword = decryptString(encryptedPassword, userKey);
+            String decryptedUsername = decryptString(encryptedPassword, userKey);
+            System.out.println("a");
             accounts.add(new Account(decryptedPassword, decryptedUsername));
         }
         return accounts;

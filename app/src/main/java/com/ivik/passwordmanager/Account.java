@@ -10,7 +10,7 @@ public class Account {
     }
 
     public String toString() {
-        return " ";
+        return password + " " + username;
     }
 
     public String getPassword() {
