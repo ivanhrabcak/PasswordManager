@@ -175,6 +175,10 @@ public class MainActivity extends AppCompatActivity {
 
         PasswordRecyclerViewAdapter adapter = new PasswordRecyclerViewAdapter(accounts);
         recyclerView.setAdapter(adapter);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
     }
 
     private void askForNewPassword() {
