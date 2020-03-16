@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -22,7 +23,24 @@ public class PasswordManager {
         this.userKey = userKey;
     }
 
+    public JSONObject getJSONObject() {
+        return passwords;
+    }
+
     public static String encryptString(String input, String key) {
+        char[] shortKey = key.toCharArray();
+        char[] longKey = new char[32];
+        for (int i = 0; i < 32; i++) {
+            if (i < shortKey.length) {
+                longKey[i] = shortKey[i];
+            }
+            else {
+                longKey[i] = '0';
+            }
+        }
+
+        key = String.valueOf(longKey);
+        System.out.println(key);
         try {
             Cipher c = Cipher.getInstance("AES");
             SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
@@ -33,11 +51,25 @@ public class PasswordManager {
             return encryptedData.toString();
         }
         catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
 
     public static String decryptString(String input, String key) {
+        char[] shortKey = key.toCharArray();
+        char[] longKey = new char[32];
+        for (int i = 0; i < 32; i++) {
+            if (i < shortKey.length) {
+                longKey[i] = shortKey[i];
+            }
+            else {
+                longKey[i] = '0';
+            }
+        }
+
+        key = String.valueOf(longKey);
+        System.out.println(key);
         try {
             Cipher c = Cipher.getInstance("AES");
             SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
@@ -74,23 +106,25 @@ public class PasswordManager {
         }
     }
 
-    public List<Account> getPasswords(String userKey) {
+    public List<Account> getPasswords(String userKey) { // TODO: fix D:
         List<Account> accounts = new ArrayList<>();
         for (Iterator<String> it = passwords.keys(); it.hasNext();) {
             String encryptedUsername = it.next();
-            String encryptedPassword = null;
+            String encryptedPassword;
 
-            String decryptedPassword = null;
-            String decryptedUsername = null;
+            String decryptedPassword;
+            String decryptedUsername;
             try {
                 encryptedPassword = passwords.getString(encryptedUsername);
 
                 decryptedPassword = decryptString(encryptedPassword, userKey);
                 decryptedUsername = decryptString(encryptedPassword, userKey);
             } catch (JSONException e) {
+                e.printStackTrace();
                 return null;
             }
             catch (Exception e) {
+                e.printStackTrace();
                 return null;
             }
 
@@ -99,27 +133,22 @@ public class PasswordManager {
         return accounts;
     }
 
-    public boolean addAccount(Account account) {
-        return addAccount(account.getUsername(), account.getPassword());
+    public void addAccount(Account account) {
+        try {
+            addAccount(account.getUsername(), account.getPassword());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
-    public boolean addAccount(String username, String password) {
-        String encryptedUsername = null;
-        String encryptedPassword = null;
-        try {
-            encryptedUsername = encryptString(username, userKey);
-            encryptedPassword = encryptString(password, userKey);
-        } catch (Exception e) {
-            return false;
-        }
-        try {
-            passwords.put(encryptedUsername, encryptedPassword);
-        } catch (JSONException e) {
-            return false;
-        }
-
-        return true;
+    public void addAccount(String username, String password) throws Exception {
+        String encryptedUsername = encryptString(username, userKey);
+        String encryptedPassword  = encryptString(password, userKey);
+        System.out.println(encryptedPassword);
+        System.out.println(encryptedUsername);
+        passwords.put(encryptedUsername, encryptedPassword);
+        System.out.println(passwords.toString());
     }
 
     public Account getAccountByUsername(String username, String userKey) {
@@ -143,6 +172,7 @@ public class PasswordManager {
     }
 
     public void parseAccountsFromJsonData(String data) throws JSONException {
+        System.out.println(data);
         passwords = new JSONObject(data);
     }
 
