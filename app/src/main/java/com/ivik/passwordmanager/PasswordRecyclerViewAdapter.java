@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,14 +27,14 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
             super(itemView);
             System.out.println("viewholder");
             passwordView = (PasswordView) itemView;
-            Button deleteButton = passwordView.findViewById(R.id.delete_button);
-            deleteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    removeAt(getAdapterPosition());
-                    passwordView.onRemove();
-                }
-            });
+//            Button deleteButton = passwordView.findViewById(R.id.delete_button);
+//            deleteButton.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    removeAt(getAdapterPosition());
+//                    passwordView.onRemove();
+//                }
+//            });
         }
     }
 

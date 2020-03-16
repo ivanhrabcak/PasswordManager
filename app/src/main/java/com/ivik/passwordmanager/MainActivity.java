@@ -9,9 +9,14 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -22,18 +27,79 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private PasswordManager passwordManager;
     private String userKey;
+    private List<Account> accounts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        askForNewPassword();
         if (SharedPreferencesHelper.isFirstTimeLaunch(this)) {
             askForNewPassword();
         }
-//        else {
-//            askForPassword();
-//        }
+        else {
+            askForPassword();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    private void addNewAccount() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add a new account:");
+
+        LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+        final EditText usernameInput = new EditText(this);
+        final EditText passwordInput = new EditText(this);
+
+        passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        usernameInput.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        usernameInput.setHint("Username");
+        passwordInput.setHint("Password");
+
+        linearLayout.addView(usernameInput);
+        linearLayout.addView(passwordInput);
+        AlertDialog alertDialog = null;
+        builder.setView(linearLayout);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String unencryptedPassword = passwordInput.getText().toString();
+                String unencryptedUsername = usernameInput.getText().toString();
+
+                Account newAccount = new Account(unencryptedPassword, unencryptedUsername);
+                passwordManager.addAccount(newAccount);
+                accounts.add(newAccount);
+                RecyclerView recyclerView = findViewById(R.id.passwords);
+                recyclerView.getAdapter().notifyDataSetChanged();
+
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                return;
+            }
+        });
+
+        builder.show();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.account_add_button) {
+            addNewAccount();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void askForPassword() {
@@ -76,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadViews() {
-        List<Account> accounts = passwordManager.getPasswords(userKey);
+        accounts = passwordManager.getPasswords(userKey);
         Account testAccount = new Account("1234", "ivik");
         accounts.add(testAccount);
 

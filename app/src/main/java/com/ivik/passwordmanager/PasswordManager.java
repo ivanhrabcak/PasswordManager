@@ -118,6 +118,7 @@ public class PasswordManager {
         } catch (JSONException e) {
             return false;
         }
+
         return true;
     }
 
