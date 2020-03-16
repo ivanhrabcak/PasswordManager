@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">PasswordManager</string>
     <string name="accounts">Accounts</string>
-    <string name="username">Username:</string>
-    <string name="password">Password:</string>
+    <string name="username">Username: </string>
+    <string name="password">Password: </string>
     <string name="password_input">Password</string>
     <string name="username_input">Username</string>
     <string name="add_dialog_button">Add</string>
