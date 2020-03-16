@@ -21,14 +21,30 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
     public class ViewHolder extends RecyclerView.ViewHolder {
         public PasswordView passwordView;
 
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            System.out.println("viewholder");
             passwordView = (PasswordView) itemView;
+            Button deleteButton = passwordView.findViewById(R.id.delete_button);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    removeAt(getAdapterPosition());
+                    passwordView.onRemove();
+                }
+            });
         }
     }
 
     public PasswordRecyclerViewAdapter(@NonNull List<Account> accounts) {
         this.accounts = accounts;
+    }
+
+    public void removeAt(int position) {
+        accounts.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, getItemCount());
     }
 
     @NonNull
@@ -49,3 +65,4 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
         return accounts.size();
     }
 }
+

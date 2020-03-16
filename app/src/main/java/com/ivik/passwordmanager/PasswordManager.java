@@ -79,29 +79,30 @@ public class PasswordManager {
         for (Iterator<String> it = passwords.keys(); it.hasNext();) {
             String encryptedUsername = it.next();
             String encryptedPassword = null;
-            try {
-                encryptedPassword = passwords.getString(encryptedUsername);
-            } catch (JSONException e) {
-                return null;
-            }
+
             String decryptedPassword = null;
             String decryptedUsername = null;
             try {
+                encryptedPassword = passwords.getString(encryptedUsername);
+
                 decryptedPassword = decryptString(encryptedPassword, userKey);
                 decryptedUsername = decryptString(encryptedPassword, userKey);
+            } catch (JSONException e) {
+                return null;
             }
             catch (Exception e) {
                 return null;
             }
+
             accounts.add(new Account(decryptedPassword, decryptedUsername));
         }
         return accounts;
     }
-    
+
     public boolean addAccount(Account account) {
         return addAccount(account.getUsername(), account.getPassword());
     }
-    
+
 
     public boolean addAccount(String username, String password) {
         String encryptedUsername = null;
@@ -143,7 +144,7 @@ public class PasswordManager {
     public void parseAccountsFromJsonData(String data) throws JSONException {
         passwords = new JSONObject(data);
     }
-    
+
     public String getJsonData() {
         return passwords.toString();
     }
