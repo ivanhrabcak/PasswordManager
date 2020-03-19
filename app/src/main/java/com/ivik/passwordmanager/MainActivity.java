@@ -53,12 +53,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
         System.out.println("onPause");
@@ -173,6 +167,13 @@ public class MainActivity extends AppCompatActivity {
         else {
             System.out.println("Failed to load saved passwords.");
         }
+        FloatingActionButton floatingActionButton = findViewById(R.id.fab);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addNewAccount();
+            }
+        });
         accounts = passwordManager.getPasswords(userKey);
         System.out.println(accounts);
 
