@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ListActivity;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -60,10 +61,21 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferencesHelper.putString(this, "jsonData", passwordManager.getJsonData());
     }
 
-    private void addNewAccount() {
+    public static void CreatePopup(Context context, String popupText, String popupButtonText) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(popupText)
+                .setPositiveButton(popupButtonText, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        builder.show();
+    }
+
+    public void addNewAccount() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final LinearLayout linearLayout = new LinearLayout(this);
-        getLayoutInflater().inflate(R.layout.add_account_dialog, linearLayout);
+        LayoutInflater.from(this).inflate(R.layout.add_account_dialog, linearLayout);
 
         final EditText usernameInput = linearLayout.findViewById(R.id.username_edittext);
         final EditText passwordInput = linearLayout.findViewById(R.id.password_edittext);
@@ -79,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 Account newAccount = new Account(unencryptedPassword, unencryptedUsername);
                 passwordManager.addAccount(newAccount);
                 accounts.add(newAccount);
-                RecyclerView recyclerView = findViewById(R.id.passwords);
+                RecyclerView recyclerView = linearLayout.findViewById(R.id.passwords);
                 recyclerView.getAdapter().notifyDataSetChanged();
                 System.out.println(passwordManager.getJSONObject());
 
@@ -94,17 +106,7 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.account_add_button) {
-            addNewAccount();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void askForPassword() {
+    public void askForPassword() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Password?");
         final String[] password = new String[1];
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 password[0] = passwordManager.hashString(unencryptedPassword);
 
                 if (SharedPreferencesHelper.getString(getApplicationContext(), "passwordHash").equals(unencryptedPassword)) {
-                    CreatePopup("Wrong!", "OK");
+                    CreatePopup(getApplicationContext(), "Wrong!", "OK");
                     askForPassword();
                     return;
                 }
@@ -132,18 +134,32 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public void CreatePopup(String popupText, String popupButtonText) {
+    public void askForNewPassword() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(popupText)
-                .setPositiveButton(popupButtonText, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
+        builder.setTitle("New password?");
+
+        final String[] password = new String[1];
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        builder.setView(input);
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String unencryptedPassword = input.getText().toString();
+                password[0] = PasswordManager.hashString(unencryptedPassword);
+                SharedPreferencesHelper.putString(getApplicationContext(), "passwordHash", password[0]);
+                passwordManager = new PasswordManager(userKey);
+                loadViews();
+            }
+        });
+
         builder.show();
+
     }
 
-    private void loadViews() {
+    public void loadViews() {
         if (SharedPreferencesHelper.getSharedPreferences(this).getString("jsonData", null) != null) {
             try {
                 passwordManager.parseAccountsFromJsonData(SharedPreferencesHelper.getString(this, "jsonData"));
@@ -179,28 +195,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void askForNewPassword() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("New password?");
 
-        final String[] password = new String[1];
-
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        builder.setView(input);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String unencryptedPassword = input.getText().toString();
-                password[0] = PasswordManager.hashString(unencryptedPassword);
-                SharedPreferencesHelper.putString(getApplicationContext(), "passwordHash", password[0]);
-                passwordManager = new PasswordManager(userKey);
-                loadViews();
-            }
-        });
-
-        builder.show();
-
-    }
 }
