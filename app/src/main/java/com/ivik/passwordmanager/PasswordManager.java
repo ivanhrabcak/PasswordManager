@@ -114,6 +114,7 @@ public class PasswordManager {
             String encryptedPassword = null;
             try {
                 encryptedPassword = passwords.getString(encryptedUsername);
+                System.out.println(encryptedPassword.equals(encryptedUsername));
             } catch (JSONException e) {
                 encryptedPassword = null;
                 e.printStackTrace();
