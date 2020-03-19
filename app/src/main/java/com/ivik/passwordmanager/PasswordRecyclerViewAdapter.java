@@ -30,14 +30,6 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
             super(itemView);
             System.out.println("viewholder");
             passwordView = (PasswordView) itemView;
-//            Button deleteButton = passwordView.findViewById(R.id.delete_button);
-//            deleteButton.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    removeAt(getAdapterPosition());
-//                    passwordView.onRemove();
-//                }
-//            });
         }
     }
 
@@ -47,11 +39,10 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
     }
 
     public void removeAt(int position) {
-        JSONObject jsonObject = passwordManager.getJSONObject();
-        for (Iterator<String> it = jsonObject.keys(); it.hasNext(); ) {
-            String encryptedUsername = it.next();
-
-        }
+        passwordManager.removeAccount(accounts.get(position));
+        accounts.remove(accounts.get(position));
+        notifyDataSetChanged();
+        notifyItemRemoved(position);
     }
 
     @NonNull

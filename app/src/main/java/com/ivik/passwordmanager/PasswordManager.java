@@ -33,12 +33,10 @@ public class PasswordManager {
     private JSONObject passwords;
     private String userKey;
     public static final String SALT = "1EVAXlM3HxNDD3m4l1ojcIYtqtA8jEhTRD40m4/2YLK5ak8lLElSYyBKbD7QJ2RdBGicw37I7/8PHD4rm6a1eb0Z0I4oZVANEB03cLFE3vUKP1NqDOnBgUgq62Gwt9InzHNrnBRddSooorfynzIpQiTyRYObx83oxcvHAloVfPM=";
-    private PasswordManager passwordManager;
 
     public PasswordManager(String userKey) {
         passwords = new JSONObject();
         this.userKey = userKey;
-        this.passwordManager = passwordManager;
     }
 
     public JSONObject getJSONObject() {
@@ -46,12 +44,20 @@ public class PasswordManager {
     }
 
     public void removeAccount(Account account) {
-        for (Account a : getPasswords(userKey)) {
-            if (a == account) {
-                passwords.remove(encryptString(a.getUsername(), userKey));
+        for (Iterator<String> it = passwords.keys(); it.hasNext(); ) {
+            try {
+                String key = it.next();
+
+                if (PasswordManager.decryptString(key, userKey).equals(account.getUsername()) && PasswordManager.decryptString(passwords.getString(key), userKey).equals(account.getPassword())) {
+                    passwords.remove(key);
+                    return;
+                }
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                return;
             }
         }
-        return;
     }
 
 
