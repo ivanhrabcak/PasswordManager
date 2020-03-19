@@ -33,31 +33,16 @@ public class PasswordManager {
         return passwords;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public static String encryptString(String input, String key) {
-        char[] shortKey = key.toCharArray();
-        char[] longKey = new char[32];
-        for (int i = 0; i < 32; i++) {
-            if (i < shortKey.length) {
-                longKey[i] = shortKey[i];
-            }
-            else {
-                longKey[i] = '0';
-            }
-        }
-
-        key = String.valueOf(longKey);
-        System.out.println(key);
+        public static String encryptString(String input, String key) {
         try {
+
             Cipher c = Cipher.getInstance("AES");
             SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-            c.init(Cipher.ENCRYPT_MODE, k);
+            c.init(ENCRYPT_MODE, k);
 
             byte[] encryptedData = c.doFinal(input.getBytes());
-            System.out.println(encryptedData.toString());
-            String a = Base64.getEncoder().encodeToString(encryptedData);
-            System.out.println(a);
-            return a;
+            String encodedData = Base64.getEncoder().encodeToString(encryptedData);
+            return encodedData;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -65,32 +50,14 @@ public class PasswordManager {
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static String decryptString(String input, String key) {
-        char[] shortKey = key.toCharArray();
-        char[] longKey = new char[32];
-        for (int i = 0; i < 32; i++) {
-            if (i < shortKey.length) {
-                longKey[i] = shortKey[i];
-            }
-            else {
-                longKey[i] = '0';
-            }
-        }
-
-        key = String.valueOf(longKey);
         try {
+            Cipher c = Cipher.getInstance("AES");
             SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, k);
-
-            byte[] base64decodedTokenArr = Base64.getDecoder().decode(input.getBytes(StandardCharsets.UTF_8));
-            byte[] decryptedPassword = cipher.doFinal(base64decodedTokenArr);
-
-            System.out.println(base64decodedTokenArr.toString());
-            System.out.println(decryptedPassword.toString());
-            return decryptedPassword.toString();
+            c.init(Cipher.DECRYPT_MODE, k);
+            byte[] encryptedData = Base64.getDecoder().decode(input);
+            byte[] data = c.doFinal(encryptedData);
+            return data.toString();
         }
         catch (Exception e) {
             e.printStackTrace();
