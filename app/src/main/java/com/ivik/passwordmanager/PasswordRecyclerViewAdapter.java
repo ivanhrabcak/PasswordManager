@@ -12,12 +12,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordRecyclerViewAdapter.ViewHolder> {
     private List<Account> accounts;
+    private PasswordManager passwordManager;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public PasswordView passwordView;
@@ -38,14 +41,17 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
         }
     }
 
-    public PasswordRecyclerViewAdapter(@NonNull List<Account> accounts) {
+    public PasswordRecyclerViewAdapter(@NonNull List<Account> accounts, PasswordManager passwordManager) {
         this.accounts = accounts;
+        this.passwordManager = passwordManager;
     }
 
     public void removeAt(int position) {
-        accounts.remove(position);
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, getItemCount());
+        JSONObject jsonObject = passwordManager.getJSONObject();
+        for (Iterator<String> it = jsonObject.keys(); it.hasNext(); ) {
+            String encryptedUsername = it.next();
+
+        }
     }
 
     @NonNull

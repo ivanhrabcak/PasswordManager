@@ -75,7 +75,7 @@ public class PasswordView extends LinearLayout {
     }
 
     public void onRemove() {
-        // todo: delete from shared preferences
+
     }
 
     private void init() {

@@ -22,10 +22,16 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.tozny.crypto.android.AesCbcWithIntegrity;
 
+import org.json.JSONException;
+
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,6 +56,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        System.out.println("onPause");
+        System.out.println(passwordManager.getJsonData());
+        SharedPreferencesHelper.putString(this, "jsonData", passwordManager.getJsonData());
     }
 
     private void addNewAccount() {
@@ -83,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 accounts.add(newAccount);
                 RecyclerView recyclerView = findViewById(R.id.passwords);
                 recyclerView.getAdapter().notifyDataSetChanged();
+                System.out.println(passwordManager.getJSONObject());
 
             }
         });
@@ -147,34 +162,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadViews() {
-        accounts = passwordManager.getPasswords(userKey);
-        Account testAccount = new Account("1234", "ivik");
-        accounts.add(testAccount);
+        if (SharedPreferencesHelper.getSharedPreferences(this).getString("jsonData", null) != null) {
+            try {
+                passwordManager.parseAccountsFromJsonData(SharedPreferencesHelper.getString(this, "jsonData"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-        System.out.println("wtf");
+        }
+        else {
+            System.out.println("Failed to load saved passwords.");
+        }
+        accounts = passwordManager.getPasswords(userKey);
+        System.out.println(accounts);
 
         RecyclerView recyclerView = findViewById(R.id.passwords);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        accounts.add(new Account("1234", "asldkasdkl"));
-        accounts.add(new Account("123123", "asdasclasckja"));
-        accounts.add(new Account("12351245123", "askjdsc mnAXL;KASLD"));
-        accounts.add(new Account("1234", "asldkasdkl"));
-        accounts.add(new Account("123123", "asdasclasckja"));
-        accounts.add(new Account("12351245123", "askjdsc mnAXL;KASLD"));
-        accounts.add(new Account("1234", "asldkasdkl"));
-        accounts.add(new Account("123123", "asdasclasckja"));
-        accounts.add(new Account("12351245123", "askjdsc mnAXL;KASLD"));
-        accounts.add(new Account("1234", "asldkasdkl"));
-        accounts.add(new Account("123123", "asdasclasckja"));
-        accounts.add(new Account("12351245123", "askjdsc mnAXL;KASLD"));
-        accounts.add(new Account("1234", "asldkasdkl"));
-        accounts.add(new Account("123123", "asdasclasckja"));
-        accounts.add(new Account("12351245123", "askjdsc mnAXL;KASLD"));
 
-        PasswordRecyclerViewAdapter adapter = new PasswordRecyclerViewAdapter(accounts);
+        PasswordRecyclerViewAdapter adapter = new PasswordRecyclerViewAdapter(accounts, passwordManager);
         recyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
         itemTouchHelper.attachToRecyclerView(recyclerView);

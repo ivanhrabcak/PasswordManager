@@ -1,53 +1,84 @@
 package com.ivik.passwordmanager;
 
+import android.content.Context;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import com.tozny.crypto.android.AesCbcWithIntegrity;
+
+import static com.tozny.crypto.android.AesCbcWithIntegrity.*;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 public class PasswordManager {
     private JSONObject passwords;
     private String userKey;
+    public static final String SALT = "1EVAXlM3HxNDD3m4l1ojcIYtqtA8jEhTRD40m4/2YLK5ak8lLElSYyBKbD7QJ2RdBGicw37I7/8PHD4rm6a1eb0Z0I4oZVANEB03cLFE3vUKP1NqDOnBgUgq62Gwt9InzHNrnBRddSooorfynzIpQiTyRYObx83oxcvHAloVfPM=";
+    private PasswordManager passwordManager;
 
     public PasswordManager(String userKey) {
         passwords = new JSONObject();
         this.userKey = userKey;
+        this.passwordManager = passwordManager;
     }
+
+    public JSONObject getJSONObject() {
+        return passwords;
+    }
+
+    public void removeAccount(Account account) {
+        for (Account a : getPasswords(userKey)) {
+            if (a == account) {
+                passwords.remove(encryptString(a.getUsername(), userKey));
+            }
+        }
+        return;
+    }
+
 
     public static String encryptString(String input, String key) {
         try {
-            Cipher c = Cipher.getInstance("AES");
-            SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-            c.init(Cipher.ENCRYPT_MODE, k);
+            SecretKeys k = generateKeyFromPassword(key, SALT.getBytes());
 
-            byte[] encryptedData = c.doFinal(input.getBytes());
-
-            return encryptedData.toString();
+            CipherTextIvMac cipherTextIvMac = encrypt(input, k);
+            String encrypted = cipherTextIvMac.toString();
+            return encrypted;
         }
         catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
 
     public static String decryptString(String input, String key) {
         try {
-            Cipher c = Cipher.getInstance("AES");
-            SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-            c.init(Cipher.DECRYPT_MODE, k);
+            SecretKeys k = generateKeyFromPassword(key, SALT.getBytes());
 
-            byte[] decrypted = c.doFinal(input.getBytes());
-
-            return decrypted.toString();
+            CipherTextIvMac cipherTextIvMac1 = new CipherTextIvMac(input);
+            String decrypted = AesCbcWithIntegrity.decryptString(cipherTextIvMac1, k);
+            return decrypted;
         }
         catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -74,52 +105,43 @@ public class PasswordManager {
         }
     }
 
-    public List<Account> getPasswords(String userKey) {
+    public List<Account> getPasswords(String userKey) { // TODO: fix D:
         List<Account> accounts = new ArrayList<>();
         for (Iterator<String> it = passwords.keys(); it.hasNext();) {
             String encryptedUsername = it.next();
-            String encryptedPassword = null;
-
-            String decryptedPassword = null;
-            String decryptedUsername = null;
+            String encryptedPassword;
             try {
                 encryptedPassword = passwords.getString(encryptedUsername);
-
-                decryptedPassword = decryptString(encryptedPassword, userKey);
-                decryptedUsername = decryptString(encryptedPassword, userKey);
             } catch (JSONException e) {
-                return null;
-            }
-            catch (Exception e) {
-                return null;
+                encryptedPassword = null;
+                e.printStackTrace();
             }
 
+            String decryptedPassword = decryptString(encryptedPassword, userKey);
+            String decryptedUsername = decryptString(encryptedUsername, userKey);
+            System.out.println(decryptedPassword);
+            System.out.println(decryptedUsername);
             accounts.add(new Account(decryptedPassword, decryptedUsername));
         }
         return accounts;
     }
 
-    public boolean addAccount(Account account) {
-        return addAccount(account.getUsername(), account.getPassword());
+    public void addAccount(Account account) {
+        try {
+            addAccount(account.getUsername(), account.getPassword());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
-    public boolean addAccount(String username, String password) {
-        String encryptedUsername = null;
-        String encryptedPassword = null;
-        try {
-            encryptedUsername = encryptString(username, userKey);
-            encryptedPassword = encryptString(password, userKey);
-        } catch (Exception e) {
-            return false;
-        }
-        try {
-            passwords.put(encryptedUsername, encryptedPassword);
-        } catch (JSONException e) {
-            return false;
-        }
-
-        return true;
+    public void addAccount(String username, String password) throws Exception {
+        String encryptedUsername = encryptString(username, userKey);
+        String encryptedPassword  = encryptString(password, userKey);
+        System.out.println(encryptedPassword);
+        System.out.println(encryptedUsername);
+        passwords.put(encryptedUsername, encryptedPassword);
+        System.out.println(passwords.toString());
     }
 
     public Account getAccountByUsername(String username, String userKey) {
@@ -143,6 +165,7 @@ public class PasswordManager {
     }
 
     public void parseAccountsFromJsonData(String data) throws JSONException {
+        System.out.println(data);
         passwords = new JSONObject(data);
     }
 
