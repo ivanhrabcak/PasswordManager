@@ -173,11 +173,7 @@ public class MainActivity extends AppCompatActivity {
         else {
             System.out.println("Failed to load saved passwords.");
         }
-        try {
-            accounts = passwordManager.getPasswords(userKey);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        accounts = passwordManager.getPasswords(userKey);
         System.out.println(accounts);
 
         RecyclerView recyclerView = findViewById(R.id.passwords);
@@ -185,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
 
 
-        PasswordRecyclerViewAdapter adapter = new PasswordRecyclerViewAdapter(accounts);
+        PasswordRecyclerViewAdapter adapter = new PasswordRecyclerViewAdapter(accounts, passwordManager);
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 

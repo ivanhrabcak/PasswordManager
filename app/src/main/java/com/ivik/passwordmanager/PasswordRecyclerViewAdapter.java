@@ -18,6 +18,7 @@ import java.util.List;
 
 public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordRecyclerViewAdapter.ViewHolder> {
     private List<Account> accounts;
+    private PasswordManager passwordManager;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public PasswordView passwordView;
@@ -38,11 +39,13 @@ public class PasswordRecyclerViewAdapter  extends RecyclerView.Adapter<PasswordR
         }
     }
 
-    public PasswordRecyclerViewAdapter(@NonNull List<Account> accounts) {
+    public PasswordRecyclerViewAdapter(@NonNull List<Account> accounts, PasswordManager passwordManager) {
         this.accounts = accounts;
+        this.passwordManager = passwordManager;
     }
 
     public void removeAt(int position) {
+        passwordManager.removeAccount(accounts.get(position));
         accounts.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, getItemCount());
