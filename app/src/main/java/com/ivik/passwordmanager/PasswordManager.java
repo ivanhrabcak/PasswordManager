@@ -1,14 +1,20 @@
 package com.ivik.passwordmanager;
 
+import android.content.Context;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
+
+import com.tozny.crypto.android.AesCbcWithIntegrity;
+
+import static com.tozny.crypto.android.AesCbcWithIntegrity.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -18,11 +24,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 public class PasswordManager {
     private JSONObject passwords;
     private String userKey;
+    public static final String SALT = "1EVAXlM3HxNDD3m4l1ojcIYtqtA8jEhTRD40m4/2YLK5ak8lLElSYyBKbD7QJ2RdBGicw37I7/8PHD4rm6a1eb0Z0I4oZVANEB03cLFE3vUKP1NqDOnBgUgq62Gwt9InzHNrnBRddSooorfynzIpQiTyRYObx83oxcvHAloVfPM=";
 
     public PasswordManager(String userKey) {
         passwords = new JSONObject();
@@ -33,16 +43,15 @@ public class PasswordManager {
         return passwords;
     }
 
-        public static String encryptString(String input, String key) {
+
+    public static String encryptString(String input, String key) {
         try {
+            String salt = SALT;
+            SecretKeys k = generateKeyFromPassword(key, salt.getBytes());
 
-            Cipher c = Cipher.getInstance("AES");
-            SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-            c.init(ENCRYPT_MODE, k);
-
-            byte[] encryptedData = c.doFinal(input.getBytes());
-            String encodedData = Base64.getEncoder().encodeToString(encryptedData);
-            return encodedData;
+            CipherTextIvMac cipherTextIvMac = encrypt(input, k);
+            String encrypted = cipherTextIvMac.toString();
+            return encrypted;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -52,12 +61,12 @@ public class PasswordManager {
 
     public static String decryptString(String input, String key) {
         try {
-            Cipher c = Cipher.getInstance("AES");
-            SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
-            c.init(Cipher.DECRYPT_MODE, k);
-            byte[] encryptedData = Base64.getDecoder().decode(input);
-            byte[] data = c.doFinal(encryptedData);
-            return data.toString();
+            String salt = SALT;
+            SecretKeys k = generateKeyFromPassword(key, salt.getBytes());
+
+            CipherTextIvMac cipherTextIvMac1 = new CipherTextIvMac(input);
+            String decrypted = AesCbcWithIntegrity.decryptString(cipherTextIvMac1, k);
+            return decrypted;
         }
         catch (Exception e) {
             e.printStackTrace();
