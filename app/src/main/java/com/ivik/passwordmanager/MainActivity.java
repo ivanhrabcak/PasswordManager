@@ -62,24 +62,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void addNewAccount() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Add a new account:");
+        final LinearLayout linearLayout = new LinearLayout(this);
+        getLayoutInflater().inflate(R.layout.add_account_dialog, linearLayout);
 
-        LinearLayout linearLayout = new LinearLayout(this);
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        final EditText usernameInput = linearLayout.findViewById(R.id.username_edittext);
+        final EditText passwordInput = linearLayout.findViewById(R.id.password_edittext);
 
-        final EditText usernameInput = new EditText(this);
-        final EditText passwordInput = new EditText(this);
-
-        passwordInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        usernameInput.setInputType(InputType.TYPE_CLASS_TEXT);
-
-        usernameInput.setHint("Username");
-        passwordInput.setHint("Password");
-
-        linearLayout.addView(usernameInput);
-        linearLayout.addView(passwordInput);
-        AlertDialog alertDialog = null;
         builder.setView(linearLayout);
+
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -94,9 +84,7 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(passwordManager.getJSONObject());
 
             }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 return;
