@@ -1,6 +1,8 @@
 package com.ivik.passwordmanager;
 
-import android.util.Base64;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,6 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class PasswordManager {
         return passwords;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static String encryptString(String input, String key) {
         char[] shortKey = key.toCharArray();
         char[] longKey = new char[32];
@@ -50,8 +54,10 @@ public class PasswordManager {
             c.init(Cipher.ENCRYPT_MODE, k);
 
             byte[] encryptedData = c.doFinal(input.getBytes());
-
-            return Base64.encodeToString(encryptedData, Base64.DEFAULT);
+            System.out.println(encryptedData.toString());
+            String a = Base64.getEncoder().encodeToString(encryptedData);
+            System.out.println(a);
+            return a;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -59,6 +65,7 @@ public class PasswordManager {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static String decryptString(String input, String key) {
         char[] shortKey = key.toCharArray();
         char[] longKey = new char[32];
@@ -72,14 +79,18 @@ public class PasswordManager {
         }
 
         key = String.valueOf(longKey);
-        System.out.println(key);
         try {
             SecretKeySpec k = new SecretKeySpec(key.getBytes(), "AES");
 
-            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
+            Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, k);
 
-            return new String(cipher.doFinal(Base64.decode(input.getBytes(), Base64.DEFAULT)));
+            byte[] base64decodedTokenArr = Base64.getDecoder().decode(input.getBytes(StandardCharsets.UTF_8));
+            byte[] decryptedPassword = cipher.doFinal(base64decodedTokenArr);
+
+            System.out.println(base64decodedTokenArr.toString());
+            System.out.println(decryptedPassword.toString());
+            return decryptedPassword.toString();
         }
         catch (Exception e) {
             e.printStackTrace();
