@@ -57,8 +57,7 @@ public class PasswordManager {
 
     public static String encryptString(String input, String key) {
         try {
-            String salt = SALT;
-            SecretKeys k = generateKeyFromPassword(key, salt.getBytes());
+            SecretKeys k = generateKeyFromPassword(key, SALT.getBytes());
 
             CipherTextIvMac cipherTextIvMac = encrypt(input, k);
             String encrypted = cipherTextIvMac.toString();
@@ -72,8 +71,7 @@ public class PasswordManager {
 
     public static String decryptString(String input, String key) {
         try {
-            String salt = SALT;
-            SecretKeys k = generateKeyFromPassword(key, salt.getBytes());
+            SecretKeys k = generateKeyFromPassword(key, SALT.getBytes());
 
             CipherTextIvMac cipherTextIvMac1 = new CipherTextIvMac(input);
             String decrypted = AesCbcWithIntegrity.decryptString(cipherTextIvMac1, k);
@@ -111,18 +109,18 @@ public class PasswordManager {
         List<Account> accounts = new ArrayList<>();
         for (Iterator<String> it = passwords.keys(); it.hasNext();) {
             String encryptedUsername = it.next();
-            String encryptedPassword = null;
+            String encryptedPassword;
             try {
                 encryptedPassword = passwords.getString(encryptedUsername);
-                System.out.println(encryptedPassword.equals(encryptedUsername));
             } catch (JSONException e) {
                 encryptedPassword = null;
                 e.printStackTrace();
             }
 
             String decryptedPassword = decryptString(encryptedPassword, userKey);
-            String decryptedUsername = decryptString(encryptedPassword, userKey);
-            System.out.println("a");
+            String decryptedUsername = decryptString(encryptedUsername, userKey);
+            System.out.println(decryptedPassword);
+            System.out.println(decryptedUsername);
             accounts.add(new Account(decryptedPassword, decryptedUsername));
         }
         return accounts;
