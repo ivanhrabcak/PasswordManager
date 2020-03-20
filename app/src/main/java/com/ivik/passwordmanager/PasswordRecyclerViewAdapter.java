@@ -81,7 +81,7 @@ public class PasswordRecyclerViewAdapter extends RecyclerView.Adapter<PasswordRe
                 else {
                     List<Account> filteredAccounts = new ArrayList<>();
                     for (Account account : accounts) {
-                        if (account.getUsername().contains(charString) || account.getPassword().contains(charString)) {
+                        if (account.getUsername().toLowerCase().contains(charString) || account.getPassword().toLowerCase().contains(charString)) {
                             filteredAccounts.add(account);
                         }
                     }
