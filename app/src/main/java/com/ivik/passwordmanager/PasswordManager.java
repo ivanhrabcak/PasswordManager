@@ -1,6 +1,8 @@
 package com.ivik.passwordmanager;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
@@ -17,6 +19,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -30,35 +35,25 @@ import javax.crypto.spec.SecretKeySpec;
 import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 public class PasswordManager {
-    private JSONObject passwords;
+    private Database database;
     private String userKey;
     public static final String SALT = "1EVAXlM3HxNDD3m4l1ojcIYtqtA8jEhTRD40m4/2YLK5ak8lLElSYyBKbD7QJ2RdBGicw37I7/8PHD4rm6a1eb0Z0I4oZVANEB03cLFE3vUKP1NqDOnBgUgq62Gwt9InzHNrnBRddSooorfynzIpQiTyRYObx83oxcvHAloVfPM=";
 
-    public PasswordManager(String userKey) {
-        passwords = new JSONObject();
+    public PasswordManager(String userKey, Context context) {
         this.userKey = userKey;
+        database = new Database(context);
     }
 
-    public JSONObject getJSONObject() {
-        return passwords;
+    public Database getDatabase() {
+        return database;
     }
 
     public void removeAccount(Account account) {
-        for (Iterator<String> it = passwords.keys(); it.hasNext(); ) {
-            try {
-                String key = it.next();
-
-                if (PasswordManager.decryptString(key, userKey).equals(account.getUsername()) && PasswordManager.decryptString(passwords.getString(key), userKey).equals(account.getPassword())) {
-                    passwords.remove(key);
-                    return;
-                }
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                return;
-            }
+        String encryptedUsername = PasswordManager.encryptString(account.getUsername(), userKey);
+        String encryptedPassword = PasswordManager.encryptString(account.getPassword(), userKey);
+        Account encryptedAccount = new Account(encryptedPassword, encryptedUsername);
+        database.removeAccount(account);
         }
-    }
 
 
     public static String encryptString(String input, String key) {
@@ -112,24 +107,7 @@ public class PasswordManager {
     }
 
     public List<Account> getPasswords(String userKey) { // TODO: fix D:
-        List<Account> accounts = new ArrayList<>();
-        for (Iterator<String> it = passwords.keys(); it.hasNext();) {
-            String encryptedUsername = it.next();
-            String encryptedPassword;
-            try {
-                encryptedPassword = passwords.getString(encryptedUsername);
-            } catch (JSONException e) {
-                encryptedPassword = null;
-                e.printStackTrace();
-            }
-
-            String decryptedPassword = decryptString(encryptedPassword, userKey);
-            String decryptedUsername = decryptString(encryptedUsername, userKey);
-            System.out.println(decryptedPassword);
-            System.out.println(decryptedUsername);
-            accounts.add(new Account(decryptedPassword, decryptedUsername));
-        }
-        return accounts;
+        return database.getAccounts(userKey);
     }
 
     public void addAccount(Account account) {
@@ -144,38 +122,10 @@ public class PasswordManager {
     public void addAccount(String username, String password) throws Exception {
         String encryptedUsername = encryptString(username, userKey);
         String encryptedPassword  = encryptString(password, userKey);
-        System.out.println(encryptedPassword);
-        System.out.println(encryptedUsername);
-        passwords.put(encryptedUsername, encryptedPassword);
-        System.out.println(passwords.toString());
+        database.insertAccount(new Account(encryptedPassword, encryptedUsername));
     }
 
-    public Account getAccountByUsername(String username, String userKey) {
-        for (Iterator<String> it = passwords.keys(); it.hasNext();) {
-            String encryptedUsername = it.next();
-            String decryptedUsername = null;
-            try {
-                decryptedUsername = decryptString(encryptedUsername, userKey);
-            } catch (Exception e) {
-                return null;
-            }
-            if (decryptedUsername.equals(username)) {
-                try {
-                    return new Account(decryptString(passwords.getString(encryptedUsername), userKey), decryptedUsername);
-                } catch (JSONException e) {
-                    return null;
-                }
-            }
-        }
-        return null;
-    }
-
-    public void parseAccountsFromJsonData(String data) throws JSONException {
-        System.out.println(data);
-        passwords = new JSONObject(data);
-    }
-
-    public String getJsonData() {
-        return passwords.toString();
+    public void apply() {
+        database.saveToDatabase();
     }
 }

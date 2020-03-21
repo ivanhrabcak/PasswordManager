@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         if (SharedPreferencesHelper.isFirstTimeLaunch(this)) {
             askForNewPassword();
         }
@@ -89,9 +90,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        System.out.println("onPause");
-        System.out.println(passwordManager.getJsonData());
-        SharedPreferencesHelper.putString(this, "jsonData", passwordManager.getJsonData());
+        passwordManager.apply();
     }
 
     public static void CreatePopup(Context context, String popupText, String popupButtonText) {
@@ -124,9 +123,8 @@ public class MainActivity extends AppCompatActivity {
                 Account newAccount = new Account(unencryptedPassword, unencryptedUsername);
                 passwordManager.addAccount(newAccount);
                 accounts.add(newAccount);
-                RecyclerView recyclerView = linearLayout.findViewById(R.id.passwords);
+                RecyclerView recyclerView = findViewById(R.id.passwords);
                 recyclerView.getAdapter().notifyDataSetChanged();
-                System.out.println(passwordManager.getJSONObject());
 
             }
         }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -153,14 +151,14 @@ public class MainActivity extends AppCompatActivity {
 
                 password[0] = passwordManager.hashString(unencryptedPassword);
 
-                if (SharedPreferencesHelper.getString(getApplicationContext(), "passwordHash").equals(unencryptedPassword)) {
-                    CreatePopup(getApplicationContext(), "Wrong!", "OK");
+                if (!(SharedPreferencesHelper.getString(getApplicationContext(), "passwordHash").equals(password[0]))) {
+                    //CreatePopup(getApplicationContext(), "Wrong!", "OK");
                     askForPassword();
                     return;
                 }
 
                 userKey = input.getText().toString();
-                passwordManager = new PasswordManager(userKey);
+                passwordManager = new PasswordManager(userKey, getApplicationContext());
                 loadViews();
             }
         });
@@ -183,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 String unencryptedPassword = input.getText().toString();
                 password[0] = PasswordManager.hashString(unencryptedPassword);
                 SharedPreferencesHelper.putString(getApplicationContext(), "passwordHash", password[0]);
-                passwordManager = new PasswordManager(userKey);
+                passwordManager = new PasswordManager(userKey, getApplicationContext());
                 loadViews();
             }
         });
@@ -193,17 +191,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadViews() {
-        if (SharedPreferencesHelper.getSharedPreferences(this).getString("jsonData", null) != null) {
-            try {
-                passwordManager.parseAccountsFromJsonData(SharedPreferencesHelper.getString(this, "jsonData"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }
-        else {
-            System.out.println("Failed to load saved passwords.");
-        }
         FloatingActionButton floatingActionButton = findViewById(R.id.fab);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,7 +199,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         accounts = passwordManager.getPasswords(userKey);
-        System.out.println(accounts);
 
         RecyclerView recyclerView = findViewById(R.id.passwords);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
