@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        passwordManager.apply();
     }
 
     public static void CreatePopup(Context context, String popupText, String popupButtonText) {

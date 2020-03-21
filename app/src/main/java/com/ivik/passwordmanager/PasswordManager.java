@@ -52,7 +52,7 @@ public class PasswordManager {
         String encryptedUsername = PasswordManager.encryptString(account.getUsername(), userKey);
         String encryptedPassword = PasswordManager.encryptString(account.getPassword(), userKey);
         Account encryptedAccount = new Account(encryptedPassword, encryptedUsername);
-        database.removeAccount(account);
+        database.removeAccount(encryptedAccount);
         }
 
 
