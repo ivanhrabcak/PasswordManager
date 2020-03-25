@@ -1,5 +1,6 @@
 package com.ivik.passwordmanager;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -46,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
     private String userKey;
     private List<Account> accounts;
     private SearchView searchView;
+    private Autofill autofill;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
         final EditText usernameInput = linearLayout.findViewById(R.id.username_edittext);
         final EditText passwordInput = linearLayout.findViewById(R.id.password_edittext);
+        final EditText webpageInput = linearLayout.findViewById(R.id.webpage_edittext);
 
         builder.setView(linearLayout);
 
@@ -118,8 +122,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 String unencryptedPassword = passwordInput.getText().toString();
                 String unencryptedUsername = usernameInput.getText().toString();
+                String unencryptedWebpage = webpageInput.getText().toString();
 
-                Account newAccount = new Account(unencryptedPassword, unencryptedUsername);
+                Account newAccount = new Account(unencryptedPassword, unencryptedUsername, unencryptedWebpage);
                 passwordManager.addAccount(newAccount);
                 accounts.add(newAccount);
                 RecyclerView recyclerView = findViewById(R.id.passwords);

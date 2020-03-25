@@ -51,7 +51,9 @@ public class PasswordManager {
     public void removeAccount(Account account) {
         String encryptedUsername = PasswordManager.encryptString(account.getUsername(), userKey);
         String encryptedPassword = PasswordManager.encryptString(account.getPassword(), userKey);
-        Account encryptedAccount = new Account(encryptedPassword, encryptedUsername);
+        String encryptedWebpage = PasswordManager.encryptString(account.getWebpage(), userKey);
+        String encryptedApplication = PasswordManager.encryptString(account.getApp(), userKey);
+        Account encryptedAccount = new Account(encryptedPassword, encryptedUsername, encryptedWebpage, encryptedApplication);
         database.removeAccount(encryptedAccount);
         }
 
@@ -106,23 +108,48 @@ public class PasswordManager {
         }
     }
 
-    public List<Account> getPasswords(String userKey) { // TODO: fix D:
+    public List<Account> getPasswords(String userKey) {
         return database.getAccounts(userKey);
+    }
+
+    public Account getDataForApplication(String packageName, String userKey) {
+        List<Account> accounts = getPasswords(userKey);
+        for (Account account : accounts) {
+            String appId = account.getApp();
+            if (appId != null) {
+                if (appId.equals(packageName)) {
+                    return account;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Account getDataForWebpage(String webpage, String userKey) {
+        List<Account> accounts = getPasswords(userKey);
+        for (Account account : accounts) {
+            if (account.getWebpage().contains(webpage)) {
+                return account;
+            }
+        }
+        return null;
     }
 
     public void addAccount(Account account) {
         try {
-            addAccount(account.getUsername(), account.getPassword());
+            addAccount(account.getUsername(), account.getPassword(), account.getWebpage(), account.getApp());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
-    public void addAccount(String username, String password) throws Exception {
+    public void addAccount(String username, String password, String webpage, String application) throws Exception {
         String encryptedUsername = encryptString(username, userKey);
         String encryptedPassword  = encryptString(password, userKey);
-        database.insertAccount(new Account(encryptedPassword, encryptedUsername));
+        String encryptedWebpage = encryptString(webpage, userKey);
+        String encryptedApplication = encryptString(application, userKey);
+        database.insertAccount(new Account(encryptedPassword, encryptedUsername, encryptedWebpage, encryptedApplication));
     }
 
     public void apply() {

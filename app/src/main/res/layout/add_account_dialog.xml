@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/username_edittext"
         android:hint="@string/username_input"
-        android:layout_margin="20dp"
+        android:layout_margin="15dp"
         android:inputType="text">
     </EditText>
 
@@ -27,10 +27,28 @@
         android:layout_height="wrap_content"
         android:id="@+id/password_edittext"
         android:hint="@string/password_input"
-        android:layout_margin="20dp"
+        android:layout_margin="15dp"
         android:inputType="text|textPassword">
     </EditText>
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/webpage_edittext"
+        android:hint="@string/webpage_edittext"
+        android:layout_margin="15dp"
+        android:inputType="text">
+    </EditText>
+
+    <!--    todo: remove-->
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/application_edittext"
+        android:hint="@string/application_bundle_id"
+        android:layout_margin="15dp"
+        android:inputType="text">
+    </EditText>
 
 
 </LinearLayout>

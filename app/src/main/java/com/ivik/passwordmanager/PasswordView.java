@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
@@ -19,12 +18,6 @@ public class PasswordView extends LinearLayout {
 
     public PasswordView(Context context) {
         super(context);
-        init();
-    }
-
-    public PasswordView(Context context, Account account) {
-        super(context);
-        this.account = account;
         init();
     }
 
@@ -47,9 +40,12 @@ public class PasswordView extends LinearLayout {
     public void bindAccount(Account account) {
         final TextView accountView = findViewById(R.id.account);
         final TextView passwordView = findViewById(R.id.password);
+        final TextView webpageView = findViewById(R.id.webpage);
 
         accountView.setText(account.getUsername());
         passwordView.setText(account.getPassword());
+        webpageView.setText(account.getWebpage());
+
 
         accountView.setOnClickListener(new OnClickListener() {
             @Override
@@ -72,10 +68,6 @@ public class PasswordView extends LinearLayout {
                 snackbar.show();
             }
         });
-    }
-
-    public void onRemove() {
-
     }
 
     private void init() {

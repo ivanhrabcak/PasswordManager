@@ -9,4 +9,7 @@
     <string name="cancel_dialog_button">Cancel</string>
     <string name="add_a_new_account">Add a new account:</string>
     <string name="search_hint">Search for accounts</string>
+    <string name="webpage">Webpage:</string>
+    <string name="webpage_edittext">Webpage</string>
+    <string name="application_bundle_id">Application bundle id</string>
 </resources>
