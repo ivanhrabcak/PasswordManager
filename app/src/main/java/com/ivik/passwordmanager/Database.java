@@ -5,9 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.lang.reflect.Array;
+import com.ivik.passwordmanager.Account;
+import com.ivik.passwordmanager.PasswordManager;
+import com.ivik.passwordmanager.AccountsContract;
+import com.ivik.passwordmanager.AccountsDb;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Database {
@@ -35,37 +38,9 @@ public class Database {
         saveToDatabase();
     }
 
-    public void removeAccount(Account account) { // ????????????
-        //System.out.println(readableDatabase.rawQuery("select * from " + AccountsContract.FeedEntry.TABLE_NAME + " where " + AccountsContract.FeedEntry.USERNAME_COLUMN_NAME + " = '" + account.getUsername() + "'" + " and " + AccountsContract.FeedEntry.PASSWORD_COLUMN_NAME + " = '" + account.getPassword() + "'", null));
-//        writableDatabase.rawQuery("delete from " + AccountsContract.FeedEntry.TABLE_NAME + " where " + AccountsContract.FeedEntry.USERNAME_COLUMN_NAME + " = '" + account.getUsername() + "' and " + AccountsContract.FeedEntry.PASSWORD_COLUMN_NAME + " = '" + account.getPassword() + "'", null);
-//        writableDatabase.rawQuery("delete from " + AccountsContract.FeedEntry.TABLE_NAME + " where " + AccountsContract.FeedEntry.PASSWORD_COLUMN_NAME + " = '" + account.getPassword() + "' and " + AccountsContract.FeedEntry.USERNAME_COLUMN_NAME + " = '" + account.getUsername() + "'", null);
-
-        String selectionPassword = AccountsContract.FeedEntry.PASSWORD_COLUMN_NAME + " = '" + account.getPassword() + "' and "
-                + AccountsContract.FeedEntry.USERNAME_COLUMN_NAME + " = '" + account.getUsername() + "' and "
-                + AccountsContract.FeedEntry.WEBPAGE_COLUMN_NAME + " = '" + account.getWebpage() + "' and "
-                + AccountsContract.FeedEntry.APPLICATION_COLUMN_NAME + " = '" + account.getApp() + "'";
-
-        String selectionUsername = AccountsContract.FeedEntry.USERNAME_COLUMN_NAME + " = '" + account.getUsername() + "' and "
-                + AccountsContract.FeedEntry.PASSWORD_COLUMN_NAME + " = '" + account.getPassword() + "' and "
-                + AccountsContract.FeedEntry.WEBPAGE_COLUMN_NAME + " = '" + account.getWebpage() + "' and "
-                + AccountsContract.FeedEntry.APPLICATION_COLUMN_NAME + " = '" + account.getApp() + "'";
-
-        String selectionWebpage = AccountsContract.FeedEntry.WEBPAGE_COLUMN_NAME + " = '" + account.getWebpage() + "' and "
-                + AccountsContract.FeedEntry.PASSWORD_COLUMN_NAME + " = '" + account.getPassword() + "' and "
-                + AccountsContract.FeedEntry.USERNAME_COLUMN_NAME + " = '" + account.getUsername() + "' and "
-                + AccountsContract.FeedEntry.APPLICATION_COLUMN_NAME + " = '" + account.getApp() + "'";
-
-        String selectionApplication = AccountsContract.FeedEntry.APPLICATION_COLUMN_NAME + "= '" + account.getApp() + "' and"
-                + AccountsContract.FeedEntry.PASSWORD_COLUMN_NAME + " = '" + account.getPassword() + "' and "
-                + AccountsContract.FeedEntry.USERNAME_COLUMN_NAME + " = '" + account.getUsername() + "' and "
-                + AccountsContract.FeedEntry.WEBPAGE_COLUMN_NAME + " = '" + account.getWebpage() + "'";
-
-        int result1 = writableDatabase.delete(AccountsContract.FeedEntry.TABLE_NAME, selectionPassword, null); // returns number of rows deleted
-        int result2 = writableDatabase.delete(AccountsContract.FeedEntry.TABLE_NAME, selectionUsername, null);
-        int result3 = writableDatabase.delete(AccountsContract.FeedEntry.TABLE_NAME, selectionWebpage, null);
-        int result4 = writableDatabase.delete(AccountsContract.FeedEntry.TABLE_NAME, selectionApplication, null);
-
-        System.out.println(result1 + result2 + result3 + result4); // 0?
+    public void removeAccount(Account account) {
+        int result1 = writableDatabase.delete(AccountsContract.FeedEntry.TABLE_NAME, AccountsContract.FeedEntry._ID + " = ?", new String[] {String.valueOf(account.getId())});
+        System.out.println(result1); // 0?
         refreshDatabase();
     }
 
@@ -77,6 +52,7 @@ public class Database {
         List<Account> accounts = new ArrayList<>();
 
         while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndex(AccountsContract.FeedEntry._ID));
             String encryptedUsername = cursor.getString(cursor.getColumnIndex(AccountsContract.FeedEntry.USERNAME_COLUMN_NAME));
             String encryptedPassword = cursor.getString(cursor.getColumnIndex(AccountsContract.FeedEntry.PASSWORD_COLUMN_NAME));
             String encryptedWebpage = cursor.getString(cursor.getColumnIndex(AccountsContract.FeedEntry.WEBPAGE_COLUMN_NAME));
@@ -87,7 +63,7 @@ public class Database {
             String decryptedWebpage = PasswordManager.decryptString(encryptedWebpage, userKey);
             String decryptedApplication = PasswordManager.decryptString(encryptedApplication, userKey);
 
-            Account account = new Account(decryptedPassword, decryptedUsername, decryptedWebpage, decryptedApplication);
+            Account account = new Account(id, decryptedPassword, decryptedUsername, decryptedWebpage, decryptedApplication);
             accounts.add(account);
         }
 
@@ -97,7 +73,8 @@ public class Database {
     public List<Account> getAccounts(String userKey) {
         refreshDatabase();
 
-        Cursor cursor = readableDatabase.rawQuery("select * from " + AccountsContract.FeedEntry.TABLE_NAME, null);
+//        Cursor cursor = readableDatabase.rawQuery("select * from " + AccountsContract.FeedEntry.TABLE_NAME, null);
+        Cursor cursor = readableDatabase.query(AccountsContract.FeedEntry.TABLE_NAME, null, null, null, null, null, null);
         return accountsCursorToList(cursor, userKey);
     }
 

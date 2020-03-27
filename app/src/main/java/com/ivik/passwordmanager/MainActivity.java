@@ -7,38 +7,25 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ListActivity;
 import android.app.SearchManager;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.tozny.crypto.android.AesCbcWithIntegrity;
+import com.ivik.passwordmanager.autofillservice.Autofill;
 
-import org.json.JSONException;
-
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -61,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
         else {
             askForPassword();
         }
+
+        SharedPreferencesHelper.setFirstTimeLaunch(this);
 
         Intent intent = getIntent();
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
@@ -106,45 +95,46 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    public void addNewAccount() {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        final LinearLayout linearLayout = new LinearLayout(this);
-        LayoutInflater.from(this).inflate(R.layout.add_account_dialog, linearLayout);
-
-        final EditText usernameInput = linearLayout.findViewById(R.id.username_edittext);
-        final EditText passwordInput = linearLayout.findViewById(R.id.password_edittext);
-        final EditText webpageInput = linearLayout.findViewById(R.id.webpage_edittext);
-
-        builder.setView(linearLayout);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+    public void showAddNewAccountDialog() {
+        AddNewAccountDialog.show(this, new AddNewAccountDialog.OnSuccessListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String unencryptedPassword = passwordInput.getText().toString();
-                String unencryptedUsername = usernameInput.getText().toString();
-                String unencryptedWebpage = webpageInput.getText().toString();
-
-                Account newAccount = new Account(unencryptedPassword, unencryptedUsername, unencryptedWebpage);
-                passwordManager.addAccount(newAccount);
-                accounts.add(newAccount);
+            public void OnAccountAdded(Account account) {
+                passwordManager.addAccount(account);
+                accounts.add(account);
                 RecyclerView recyclerView = findViewById(R.id.passwords);
                 recyclerView.getAdapter().notifyDataSetChanged();
-
-            }
-        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                return;
             }
         });
+    }
 
-        builder.show();
+    public void OnNewPasswordCreated(String unencryptedPassword) {
+
+        final String[] password = new String[1];
+        password[0] = PasswordManager.hashString(unencryptedPassword);
+        SharedPreferencesHelper.putString(getApplicationContext(), "passwordHash", password[0]);
+        passwordManager = new PasswordManager(userKey, getApplicationContext());
+        loadViews();
+    }
+
+    public void OnUnlock(String unencryptedPassword) {
+        final String[] password = new String[1];
+
+        password[0] = passwordManager.hashString(unencryptedPassword);
+
+        if (!(SharedPreferencesHelper.getString(getApplicationContext(), "passwordHash").equals(password[0]))) {
+            askForPassword();
+            return;
+        }
+
+        userKey = unencryptedPassword;
+        passwordManager = new PasswordManager(userKey, getApplicationContext());
+        loadViews();
     }
 
     public void askForPassword() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Password?");
-        final String[] password = new String[1];
+
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         builder.setView(input);
@@ -153,9 +143,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 String unencryptedPassword = input.getText().toString();
 
-                password[0] = passwordManager.hashString(unencryptedPassword);
+                String password = passwordManager.hashString(unencryptedPassword);
 
-                if (!(SharedPreferencesHelper.getString(getApplicationContext(), "passwordHash").equals(password[0]))) {
+                if (!(SharedPreferencesHelper.getString(getApplicationContext(), "passwordHash").equals(password))) {
                     //CreatePopup(getApplicationContext(), "Wrong!", "OK");
                     askForPassword();
                     return;
@@ -173,8 +163,6 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("New password?");
 
-        final String[] password = new String[1];
-
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         builder.setView(input);
@@ -183,8 +171,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String unencryptedPassword = input.getText().toString();
-                password[0] = PasswordManager.hashString(unencryptedPassword);
-                SharedPreferencesHelper.putString(getApplicationContext(), "passwordHash", password[0]);
+                String userKey = unencryptedPassword;
+                String password = PasswordManager.hashString(unencryptedPassword);
+                SharedPreferencesHelper.putString(getApplicationContext(), "passwordHash", password);
                 passwordManager = new PasswordManager(userKey, getApplicationContext());
                 loadViews();
             }
@@ -199,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addNewAccount();
+                showAddNewAccountDialog();
             }
         });
         accounts = passwordManager.getPasswords(userKey);
@@ -208,16 +197,15 @@ public class MainActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        PasswordRecyclerViewAdapter adapter = new PasswordRecyclerViewAdapter(accounts, passwordManager);
+        final PasswordRecyclerViewAdapter adapter = new PasswordRecyclerViewAdapter(accounts, passwordManager);
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
         searchView.setOnQueryTextListener(new QueryTextListener(adapter));
 
 
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
-        itemTouchHelper.attachToRecyclerView(recyclerView);
-
+       ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(adapter, this));
+       itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
 

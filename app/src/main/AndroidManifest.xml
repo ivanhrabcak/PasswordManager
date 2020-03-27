@@ -23,6 +23,11 @@
                 android:resource="@xml/service_configuration" />
 
         </activity>
+        <service android:name=".autofillservice.Autofill"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+        </service>
     </application>
-
 </manifest>

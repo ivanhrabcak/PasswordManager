@@ -1,6 +1,7 @@
 package com.ivik.passwordmanager;
 
 public class Account {
+    private int id;
     private String password;
     private String username;
     private String webpage;
@@ -13,11 +14,28 @@ public class Account {
         this.app = app;
     }
 
-    public Account(String password, String username, String webpage) {
+    public Account(int id, String password, String username, String webpage, String app) {
+        this.id = id;
+        this.password = password;
+        this.username = username;
+        this.webpage = webpage;
+        this.app = app;
+    }
+
+    public Account(int id, String password, String username, String webpage) {
+        this.id = id;
         this.password = password;
         this.username = username;
         this.webpage = webpage;
         this.app = null;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getWebpage() {
