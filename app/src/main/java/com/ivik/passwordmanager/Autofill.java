@@ -1,13 +1,8 @@
 package com.ivik.passwordmanager;
 
-import android.app.Service;
 import android.app.assist.AssistStructure;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.IBinder;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillCallback;
@@ -16,13 +11,14 @@ import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
 import android.service.autofill.SaveCallback;
 import android.service.autofill.SaveRequest;
-import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.widget.RemoteViews;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
+import com.ivik.passwordmanager.Account;
+import com.ivik.passwordmanager.PasswordManager;
 
 import java.util.List;
 
@@ -31,20 +27,28 @@ public class Autofill extends AutofillService {
     private PasswordManager passwordManager;
     private String userKey;
 
-    public Autofill(PasswordManager passwordManager, String userKey) {
-        this.passwordManager = passwordManager;
-        this.userKey = userKey;
-    }
+    public Autofill() {}
+
+//    public Autofill(PasswordManager passwordManager, String userKey) {
+//        this.passwordManager = passwordManager;
+//        this.userKey = userKey;
+//    }
 
     @Override
     public void onFillRequest(@NonNull FillRequest request, @NonNull CancellationSignal cancellationSignal, @NonNull FillCallback callback) {
+        userKey = "1234";
+        passwordManager = new PasswordManager(userKey, this);
+
+        System.out.println("Here 1");
         List<FillContext> contexts = request.getFillContexts();
         AssistStructure assistStructure = contexts.get(contexts.size() - 1).getStructure();
         ParsedStructure parsedStructure = ParsedStructure.parseStructure(assistStructure, passwordManager, userKey);
         if (parsedStructure == null) {
+            System.out.println("Here 2");
             callback.onSuccess(null);
         }
         else {
+            System.out.println("Here 3");
             Account account = parsedStructure.getAccount();
 
             RemoteViews usernamePresentation = new RemoteViews(getPackageName(), android.R.layout.simple_list_item_1);

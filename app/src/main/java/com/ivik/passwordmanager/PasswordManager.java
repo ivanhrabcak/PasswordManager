@@ -1,38 +1,16 @@
 package com.ivik.passwordmanager;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
 
-import androidx.annotation.RequiresApi;
-
+import com.ivik.passwordmanager.database.Database;
 import com.tozny.crypto.android.AesCbcWithIntegrity;
 
 import static com.tozny.crypto.android.AesCbcWithIntegrity.*;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Iterator;
 import java.util.List;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
-import static javax.crypto.Cipher.ENCRYPT_MODE;
 
 public class PasswordManager {
     private Database database;
@@ -53,7 +31,7 @@ public class PasswordManager {
         String encryptedPassword = PasswordManager.encryptString(account.getPassword(), userKey);
         String encryptedWebpage = PasswordManager.encryptString(account.getWebpage(), userKey);
         String encryptedApplication = PasswordManager.encryptString(account.getApp(), userKey);
-        Account encryptedAccount = new Account(encryptedPassword, encryptedUsername, encryptedWebpage, encryptedApplication);
+        Account encryptedAccount = new Account(account.getId(), encryptedPassword, encryptedUsername, encryptedWebpage, encryptedApplication);
         database.removeAccount(encryptedAccount);
         }
 
@@ -64,6 +42,8 @@ public class PasswordManager {
 
             CipherTextIvMac cipherTextIvMac = encrypt(input, k);
             String encrypted = cipherTextIvMac.toString();
+            System.out.println("ClearText: " + input);
+            System.out.println("CipherText: " + encrypted);
             return encrypted;
         }
         catch (Exception e) {

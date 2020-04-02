@@ -2,7 +2,6 @@ package com.ivik.passwordmanager;
 
 import android.app.assist.AssistStructure;
 import android.os.Build;
-import android.widget.EditText;
 
 import androidx.annotation.RequiresApi;
 
@@ -102,7 +101,7 @@ public class ParsedStructure {
             account = passwordManager.getDataForWebpage(webpage, userKey);
         }
         else {
-            account = passwordManager.getDataForApplication(packageName, userKey);
+            account = new Account(1, "1234", "john", "page", "com.google.android.gms");//passwordManager.getDataForApplication(packageName, userKey);
         }
         ParsedStructure parsedStructure = new ParsedStructure(account);
         for (int i = 0; i < assistStructure.getWindowNodeCount(); i++) {
